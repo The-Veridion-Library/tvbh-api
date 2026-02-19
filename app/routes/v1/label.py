@@ -3,8 +3,10 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, selectinload
 
 from app.db import SessionLocal
-from app.models import PaperLabel  # make sure this imports your SQLAlchemy models
+from app.models import PaperLabel, Book  # make sure this imports your SQLAlchemy models
 from app.pdf_utils import generate_label_pdf  # your PDF generation function
+from app import crud
+from app.schemas import PaperLabelOut
 
 router = APIRouter()
 
@@ -20,7 +22,7 @@ def get_db():
         db.close()
 
 
-@router.get("/label/pdf/{paper_id}")
+@router.get("/v1/label/pdf/{paper_id}")
 def download_label_pdf(paper_id: int, db: Session = Depends(get_db)):
     """
     Generate and return the PDF for a specific PaperLabel.
@@ -44,3 +46,23 @@ def download_label_pdf(paper_id: int, db: Session = Depends(get_db)):
         media_type="application/pdf",
         headers={"Content-Disposition": f'inline; filename="label_{paper_id}.pdf"'}
     )
+
+
+@router.post("/v1/label/mint/{book_id}", response_model=PaperLabelOut)
+def mint_label(book_id: int, db: Session = Depends(get_db)):
+    """
+    Create a new PaperLabel for the provided `book_id` (path parameter) and return it.
+    Example: POST /label/mint/123
+    """
+    # Ensure the referenced book exists
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    # Create the label
+    label = crud.create_label(db, book_id)
+
+    # Eager-load the book relationship so response_model can include it
+    label = db.query(PaperLabel).options(selectinload(PaperLabel.book)).filter(PaperLabel.id == label.id).first()
+
+    return label
