@@ -8,15 +8,17 @@ from app.routes.v1 import label, verify, admin as admin_routes
 from app.db import init_db
 import uvicorn
 from app.routes.v1.book import create as book_create
-from app.auth import verify_jwt_token
+from app.routes.v1.key import router as key_router
+from app.auth import verify_auth
 
-app = FastAPI(title="TVBH - API - Version 1.0", version="1.0", dependencies=[Depends(verify_jwt_token)])
+app = FastAPI(title="TVBH - API - Version 1.0", version="1.0", dependencies=[Depends(verify_auth)])
 
 # Include routers
 app.include_router(admin_routes.router)
 app.include_router(label.router)
 app.include_router(verify.router)
 app.include_router(book_create.router)
+app.include_router(key_router)
 
 
 @app.on_event("startup")

@@ -3,6 +3,13 @@ from sqlalchemy.orm import Session
 from app.db import SessionLocal
 from app.models import PaperLabel, LabelStatus
 import datetime
+from app.models import APIKey
+from passlib.context import CryptContext
+import hmac
+
+
+# Password / key hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_label_by_paper_id(paper_id: int):
@@ -38,3 +45,27 @@ def create_label(db: Session, book_id: int) -> PaperLabel:
     # Refresh the new label to get generated fields
     db.refresh(new_label)
     return new_label
+
+
+def create_api_key(db: Session, user_id: int, raw_key: str) -> APIKey:
+    """Hash `raw_key` and store an APIKey record tied to `user_id`. Returns the created APIKey instance."""
+    hashed = pwd_context.hash(raw_key)
+    api = APIKey(user_id=user_id, key_hash=hashed)
+    db.add(api)
+    db.commit()
+    db.refresh(api)
+    return api
+
+
+def verify_api_key(db: Session, raw_key: str) -> APIKey:
+    """Return the APIKey record if `raw_key` matches any stored hash, otherwise None."""
+    # Fetch all keys and verify with bcrypt verify to avoid needing to store raw
+    keys = db.query(APIKey).all()
+    for k in keys:
+        try:
+            if pwd_context.verify(raw_key, k.key_hash):
+                return k
+        except Exception:
+            # ignore malformed hash
+            continue
+    return None
