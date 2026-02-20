@@ -13,7 +13,7 @@ class BookOut(BaseModel):
     isbn: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class LabelMintRequest(BaseModel):
     book_id: int
@@ -24,4 +24,4 @@ class PaperLabelOut(BaseModel):
     status: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

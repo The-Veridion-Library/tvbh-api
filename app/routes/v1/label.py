@@ -8,7 +8,7 @@ from app.pdf_utils import generate_label_pdf  # your PDF generation function
 from app import crud
 from app.schemas import PaperLabelOut
 
-router = APIRouter()
+router = APIRouter(tags=["Labels"], prefix="/v1/label")
 
 # Replace this with your actual base URL
 BASE_URL = "http://127.0.0.1:8000"
@@ -22,7 +22,7 @@ def get_db():
         db.close()
 
 
-@router.get("/v1/label/pdf/{paper_id}")
+@router.get("/pdf/{paper_id}")
 def download_label_pdf(paper_id: int, db: Session = Depends(get_db)):
     """
     Generate and return the PDF for a specific PaperLabel.
@@ -48,7 +48,7 @@ def download_label_pdf(paper_id: int, db: Session = Depends(get_db)):
     )
 
 
-@router.post("/v1/label/mint/{book_id}", response_model=PaperLabelOut)
+@router.post("/mint/{book_id}", response_model=PaperLabelOut)
 def mint_label(book_id: int, db: Session = Depends(get_db)):
     """
     Create a new PaperLabel for the provided `book_id` (path parameter) and return it.

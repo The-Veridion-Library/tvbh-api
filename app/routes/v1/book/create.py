@@ -5,7 +5,7 @@ from app.db import SessionLocal
 from app.models import Book
 from app.schemas import BookCreate, BookOut
 
-router = APIRouter()
+router = APIRouter(tags=["Books"])
 
 def get_db():
     db = SessionLocal()

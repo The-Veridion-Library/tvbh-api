@@ -5,7 +5,7 @@ from app.db import SessionLocal
 from app.models import PaperLabel, LabelStatus
 from app.schemas import PaperLabelOut
 
-router = APIRouter()
+router = APIRouter(tags=["Verification"])
 
 # Dependency to get DB session
 def get_db():
