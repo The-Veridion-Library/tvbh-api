@@ -5,3 +5,5 @@ psycopg2-binary
 reportlab
 qrcode[pil]
 python-dotenv
+PyJWT
+passlib[bcrypt]

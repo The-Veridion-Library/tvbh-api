@@ -1,15 +1,16 @@
 # app/main.py
 from fastapi import FastAPI
-from app.routes.v1 import label, verify
+from app.routes.v1 import label, verify, admin as admin_routes
 from app.db import init_db
 import uvicorn
 from app.routes.v1.book import create as book_create
 
-app = FastAPI(title="The Veridion Book Hunt - API")
+app = FastAPI(title="TVBH - API - Version 1.0", version="1.0")
 
 # Include routers
 app.include_router(label.router)
 app.include_router(verify.router)
+app.include_router(admin_routes.router)
 app.include_router(book_create.router)
 
 
