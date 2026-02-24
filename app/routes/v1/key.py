@@ -14,9 +14,9 @@ class CreateKeyIn(BaseModel):
 @router.post("/create")
 def create_key(payload: CreateKeyIn, auth=Depends(verify_auth)):
     """Generate a new API key for `user_id`, return the plaintext key once and store only the hash."""
-    # Require JWT auth for creating API keys (prevent API key from creating other keys)
-    if auth.get("type") != "jwt":
-        raise HTTPException(status_code=403, detail="API key creation requires JWT authentication")
+    # Require JWT auth or Dev auth for creating API keys (prevent API key from creating other keys)
+    if auth.get("type") not in ("jwt", "dev"):
+        raise HTTPException(status_code=403, detail="API key creation requires JWT or Dev authentication")
 
     raw_key = __generate_raw_key()
 

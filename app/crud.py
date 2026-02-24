@@ -5,11 +5,20 @@ from app.models import PaperLabel, LabelStatus
 import datetime
 from app.models import APIKey
 from passlib.context import CryptContext
+import os
 import hmac
 
 
 # Password / key hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use a pure-Python scheme for development if `DEV_AUTH_TOKEN` is present
+# to avoid bcrypt C-extension issues on some environments. In production
+# prefer `bcrypt` for stronger hashing; set `FORCE_BCRYPT=1` to override.
+if os.getenv("FORCE_BCRYPT"):
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+elif os.getenv("DEV_AUTH_TOKEN"):
+    pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+else:
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_label_by_paper_id(paper_id: int):

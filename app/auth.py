@@ -9,6 +9,8 @@ from app import crud
 # Expose these security dependencies so FastAPI/OpenAPI shows the schemes
 security = HTTPBearer(auto_error=False, scheme_name="JWT Secret")
 api_key_scheme = APIKeyHeader(name="X-API-Key", auto_error=False, scheme_name="API Key")
+# Dev testing header - set `DEV_AUTH_TOKEN` in your .env to enable
+dev_api_scheme = APIKeyHeader(name="X-DEV-AUTH", auto_error=False, scheme_name="Dev Auth")
 
 
 def verify_jwt_token_from_header(token: str) -> dict:
@@ -27,13 +29,23 @@ def verify_jwt_token_from_header(token: str) -> dict:
 def verify_auth(
     bearer: HTTPAuthorizationCredentials = Depends(security),
     x_api_key: str = Depends(api_key_scheme),
+    x_dev_token: str = Depends(dev_api_scheme),
 ):
     """Dependency that accepts either a Bearer JWT or an X-API-Key header.
 
     Because this function depends on FastAPI security dependencies (`HTTPBearer` and `APIKeyHeader`),
     the OpenAPI schema will include those security schemes and the docs will show the Authorize button.
     """
-    # First: Bearer JWT (handled by HTTPBearer)
+    # First: Dev token (for local/dev testing)
+    # Enable by setting DEV_AUTH_TOKEN in your .env to a chosen secret.
+    dev_secret = os.getenv("DEV_AUTH_TOKEN")
+    if dev_secret and x_dev_token:
+        if x_dev_token == dev_secret:
+            return {"type": "dev", "token": x_dev_token}
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid dev token")
+
+    # Second: Bearer JWT (handled by HTTPBearer)
     if bearer and bearer.scheme and bearer.credentials:
         payload = verify_jwt_token_from_header(bearer.credentials)
         return {"type": "jwt", "payload": payload}
