@@ -7,6 +7,7 @@ from app.models import PaperLabel, Book  # make sure this imports your SQLAlchem
 from app.pdf_utils import generate_label_pdf  # your PDF generation function
 from app import crud
 from app.schemas import PaperLabelOut
+from app.auth import verify_auth
 
 router = APIRouter(tags=["Labels"], prefix="/v1/label")
 
@@ -23,7 +24,7 @@ def get_db():
 
 
 @router.get("/pdf/{paper_id}")
-def download_label_pdf(paper_id: int, db: Session = Depends(get_db)):
+def download_label_pdf(paper_id: int, db: Session = Depends(get_db), auth=Depends(verify_auth)):
     """
     Generate and return the PDF for a specific PaperLabel.
     Eager-loads the book relationship to avoid DetachedInstanceError.
@@ -49,7 +50,7 @@ def download_label_pdf(paper_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/mint/{book_id}", response_model=PaperLabelOut)
-def mint_label(book_id: int, db: Session = Depends(get_db)):
+def mint_label(book_id: int, db: Session = Depends(get_db), auth=Depends(verify_auth)):
     """
     Create a new PaperLabel for the provided `book_id` (path parameter) and return it.
     Example: POST /label/mint/123

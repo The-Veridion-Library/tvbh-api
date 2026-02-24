@@ -32,4 +32,6 @@ def create_key(payload: CreateKeyIn, auth=Depends(verify_auth)):
 def __generate_raw_key() -> str:
     import secrets
     # produce a URL-safe string; length ~43 chars for 32 bytes
-    return secrets.token_urlsafe(32)
+    base = secrets.token_urlsafe(32)
+    # Prefix for identification; result like `tvbh_<token>`
+    return f"tvbh_{base}"

@@ -1,0 +1,18 @@
+/* Custom Swagger UI overrides for TVBH API docs */
+.swagger-ui .topbar {
+  background: linear-gradient(90deg, #0b5fff, #0066ff);
+}
+.swagger-ui .topbar .topbar-wrapper .link .title {
+  font-weight: 700;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.swagger-ui .info .title {
+  color: #0b5fff;
+}
+/* Reduce default padding for compactness */
+.swagger-ui .opblock-summary {
+  padding: 8px 12px;
+}
